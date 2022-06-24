@@ -46,18 +46,20 @@ class Tree {
     // Each Node will have a "name" (value) of a random number 
     // in-between the lowerBound and upperBound aruments
     // if the factory already has children they are removed prior to a new generation 
-    static async createFactoryChildren(factoryName, numChildren,lowerBound,upperBound) {
+    static async createFactoryChildren(factoryID, numChildren,lowerBound,upperBound) {
+        
         const factoryRes = await db.query(
             `SELECT * FROM tree
-            WHERE name = $1`,
-            [factoryName]
+            WHERE node_id = $1`,
+            [factoryID]
         )
         const factory = factoryRes.rows[0]
-        if (!factory) throw new NotFoundError(`No factory: ${factoryName}`)
+        console.log("factory=",factory)
+        if (!factory) throw new NotFoundError(`No factory: ${factoryID}`)
         
         const childRes = await db.query(
             `SELECT * FROM tree
-            WHERE parent_id = ${factory.node_id}`
+            WHERE parent_id = ${factoryID}`
         )
 
         factory.children = childRes.rows
@@ -70,6 +72,7 @@ class Tree {
                     WHERE node_id = ${child.node_id}`
                 )
             }
+            factory.children = []
         }
         // pass in the lower and upperBound args to generate a random number in the proper range
         function randomIntFromInterval(min, max) {    
@@ -80,12 +83,14 @@ class Tree {
             const childVal =  randomIntFromInterval(lowerBound,upperBound)
             const newChildRes = await db.query(
                 `INSERT INTO tree (parent_id, name)
-                VALUES (${factory.node_id}, ${childVal.toString()})`
+                VALUES (${factory.node_id}, ${childVal.toString()})
+                RETURNING node_id, parent_id, name`
+                
             )
             const newChild = newChildRes.rows[0]
             factory.children.push(newChild)
             }  
-          
+        return factory.children
     }
 
     static async remove (node_id) {

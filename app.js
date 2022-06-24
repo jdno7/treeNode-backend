@@ -25,12 +25,14 @@ app.post('/tree', async function (req, res){
   return res.status(201).json(factory)
 })
 
-app.post('/tree/:name', async function (req, res){
+app.post('/tree/:node_id', async function (req, res, next){
   const {numChildren,lowerBound,upperBound} = req.body
-  const factoryName = req.params.name
+  const factoryID = +req.params.node_id
+  
   try {
-    await Tree.createFactoryChildren(factoryName,numChildren,lowerBound,upperBound)
-    return res.json(`created ${numChildren} for ${factoryName}`)
+    const children = await Tree.createFactoryChildren(factoryID,numChildren,lowerBound,upperBound)
+    console.log("returning ",children)
+    return res.json(children)
   }catch (err){
     return next(err)
   }
