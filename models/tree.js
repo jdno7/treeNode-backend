@@ -42,6 +42,18 @@ class Tree {
         const factory = res.rows[0]
         return factory
     }
+
+       static async updateFactoryName (id, name)  {
+        console.log("id and name =",id,name)
+            const res = await db.query (
+                `UPDATE tree
+                SET name = $1
+                WHERE node_id = $2
+                RETURNING name`,
+                [name,id]
+            )
+            return (res.rows[0])
+       }
     // create 'numChildren' amount of child nodes for a factory Node
     // Each Node will have a "name" (value) of a random number 
     // in-between the lowerBound and upperBound aruments

@@ -31,11 +31,19 @@ app.post('/tree/:node_id', async function (req, res, next){
   
   try {
     const children = await Tree.createFactoryChildren(factoryID,numChildren,lowerBound,upperBound)
-    console.log("returning ",children)
+    
     return res.json(children)
   }catch (err){
     return next(err)
   }
+})
+
+app.patch('/tree/:node_id', async function (req, res, next){
+  const {name} = req.body
+  const id = +req.params.node_id
+  const updatedFactory = await Tree.updateFactoryName(id,name)
+
+  return res.json(updatedFactory)
 })
 app.delete('/tree/:node_id', async function (req, res){
   try {
