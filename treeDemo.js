@@ -1,3 +1,5 @@
+// Worked through the requirements here first for the basic tree model functionality
+
 class TreeNode {
   constructor(val, children = []) {
     this.val = val;

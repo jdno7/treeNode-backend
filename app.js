@@ -15,20 +15,25 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan("tiny"));
 
+// return a tree object with root and factories keys
 app.get('/tree', async function (req, res){
   const tree = await Tree.get()
   return res.json(tree)
 })
-
+// create a new factory
+// req.body = {"name": "factory name" }
 app.post('/tree', async function (req, res){
-  const factory = await Tree.createFactory(req.body)
-  return res.status(201).json(factory)
+  try {
+    const factory = await Tree.createFactory(req.body)
+    return res.status(201).json(factory)
+  }catch (err){
+    return next(err)
+  }
 })
-
+// Generate new children for an existinng factory
 app.post('/tree/:node_id', async function (req, res, next){
   const {numChildren,lowerBound,upperBound} = req.body
   const factoryID = +req.params.node_id
-  
   try {
     const children = await Tree.createFactoryChildren(factoryID,numChildren,lowerBound,upperBound)
     return res.json(children)
@@ -36,14 +41,18 @@ app.post('/tree/:node_id', async function (req, res, next){
     return next(err)
   }
 })
-
+// Update Factory Name
 app.patch('/tree/:node_id', async function (req, res, next){
   const {name} = req.body
   const id = +req.params.node_id
-  const updatedFactory = await Tree.updateFactoryName(id,name)
-
-  return res.json(updatedFactory)
+  try{
+    const updatedFactory = await Tree.updateFactoryName(id,name)
+    return res.json(updatedFactory)
+  }catch (e) {
+    return next(err)
+  }
 })
+// remove a factory node
 app.delete('/tree/:node_id', async function (req, res){
   try {
     await Tree.remove(req.params.node_id)

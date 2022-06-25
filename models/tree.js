@@ -1,7 +1,6 @@
 "use strict";
 
 const db = require("../db");
-const bcrypt = require("bcrypt");
 const {
   NotFoundError,
   BadRequestError,
@@ -9,6 +8,8 @@ const {
 } = require("../expressError");
 
 class Tree {
+    // Query ,organize and return Root, Factory and Factory.children nodes
+    // Return --- {root:{root}, factories:[{node_id,parent_id,name,children:[{child}{child}]}]}
     static async get () {
         const rootRes = await db.query (
             `SELECT * FROM tree
@@ -31,6 +32,7 @@ class Tree {
         return {root:root, factories:factories}
     }
 
+    // create and return a new factory
     static async createFactory ({name}) {
         const res = await db.query(
             `INSERT INTO tree
@@ -42,7 +44,7 @@ class Tree {
         const factory = res.rows[0]
         return factory
     }
-
+    // Update the name column of a factory node
        static async updateFactoryName (id, name)  {
         console.log("id and name =",id,name)
             const res = await db.query (
@@ -55,9 +57,9 @@ class Tree {
             return (res.rows[0])
        }
     // create 'numChildren' amount of child nodes for a factory Node
-    // Each Node will have a "name" (value) of a random number 
+    // Each Node will have a "name" of a random number 
     // in-between the lowerBound and upperBound aruments
-    // if the factory already has children they are removed prior to a new generation 
+    // if the factory already has children they are removed prior to a new children generation 
     static async createFactoryChildren(factoryID, numChildren,lowerBound,upperBound) {
         
         const factoryRes = await db.query(
@@ -66,7 +68,7 @@ class Tree {
             [factoryID]
         )
         const factory = factoryRes.rows[0]
-        console.log("factory=",factory)
+
         if (!factory) throw new NotFoundError(`No factory: ${factoryID}`)
         
         const childRes = await db.query(
@@ -75,8 +77,8 @@ class Tree {
         )
 
         factory.children = childRes.rows
+
         if (factory.children.length != 0){
-            // console.log('removing children')
             for (let child of factory.children){
                 const res = await db.query(
                     `DELETE
@@ -88,7 +90,6 @@ class Tree {
         }
         // pass in the lower and upperBound args to generate a random number in the proper range
         function randomIntFromInterval(min, max) {    
-            console.log("min&max*********",lowerBound,upperBound)
                  return Math.floor(Math.random() * (max - min + 1) + min)
                  }
         // generate new children based on the numChildren arg
@@ -105,7 +106,7 @@ class Tree {
             }  
         return factory.children
     }
-
+    // remove a factory node from db
     static async remove (node_id) {
         await db.query(
             `DELETE 
@@ -115,37 +116,7 @@ class Tree {
             [node_id]
         );
     }
-//     constructor(root = new TreeNode('Root')) {
-//       this.root = root;
-//     }
-  
-//     createFactory (name) {
-//       const factory = new TreeNode(name)
-//       this.root.children.push(factory)
-//     }
-  
-//     removeFactory (name) {
-//       const f = this.root.children.find(factory => factory.val === name)
-//       this.root.children = this.root.children.filter(child => child != f)
-//     }
-    
-//     createFactoryChildren(factoryName, numChildren,lowerBound,upperBound) {
-//      const f = this.root.children.find(factory => factory.val === factoryName)
-//      if (f.children.length != 0) f.children = []
-      
-//      function randomIntFromInterval(min, max) { 
-//      return Math.floor(Math.random() * (max - min + 1) + min)
-//      }
-//      for (let i = 0; i < numChildren; i++){
-//        const childVal =  randomIntFromInterval(lowerBound,upperBound)
-//         console.log(childVal)
-//        const childNode = new TreeNode(childVal)
-//         console.log(childNode)
-//        f.children.push(childNode)
-//      }
-       
-//    }
-    
+
   }
 
   module.exports = Tree

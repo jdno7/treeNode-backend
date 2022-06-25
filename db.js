@@ -1,5 +1,5 @@
 "use strict";
-/** Database setup for jobly. */
+/** Database setup for treeNode. */
 const { Client } = require("pg");
 const { getDatabaseUri } = require("./config");
 
