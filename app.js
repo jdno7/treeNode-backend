@@ -31,7 +31,6 @@ app.post('/tree/:node_id', async function (req, res, next){
   
   try {
     const children = await Tree.createFactoryChildren(factoryID,numChildren,lowerBound,upperBound)
-    
     return res.json(children)
   }catch (err){
     return next(err)

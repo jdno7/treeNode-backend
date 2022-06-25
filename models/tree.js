@@ -88,11 +88,12 @@ class Tree {
         }
         // pass in the lower and upperBound args to generate a random number in the proper range
         function randomIntFromInterval(min, max) {    
+            console.log("min&max*********",lowerBound,upperBound)
                  return Math.floor(Math.random() * (max - min + 1) + min)
                  }
         // generate new children based on the numChildren arg
          for (let i = 0; i < numChildren; i++){
-            const childVal =  randomIntFromInterval(lowerBound,upperBound)
+            const childVal =  randomIntFromInterval(+lowerBound,+upperBound)
             const newChildRes = await db.query(
                 `INSERT INTO tree (parent_id, name)
                 VALUES (${factory.node_id}, ${childVal.toString()})
