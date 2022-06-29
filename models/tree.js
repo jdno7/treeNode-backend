@@ -18,7 +18,8 @@ class Tree {
         const root = rootRes.rows[0]
         const factoriesRes = await db.query (
             `SELECT * FROM tree
-            WHERE parent_id = 1`
+            WHERE parent_id = 1
+            ORDER BY node_id`
         )
         const factories = factoriesRes.rows
         for (let f of factories){
