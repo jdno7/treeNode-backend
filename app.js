@@ -10,11 +10,25 @@ const { NotFoundError } = require("./expressError");
 const morgan = require("morgan");
 
 const app = express();
+const wsExpress = require('express-ws')(app);
 
 app.use(cors());
 app.use(express.json());
 app.use(morgan("tiny"));
 
+// Web socket connection
+// When the tree is updated on the client side a message will come here
+// Send back the updated tree to all users (clients) to update state live
+app.ws('/tree', function (ws, req, next){
+  ws.on('message', async function (data) {
+  const tree = await Tree.get()
+  wsExpress.getWss().clients.forEach(client => {
+    if (client.readyState === 1) {
+      client.send(JSON.stringify(tree))
+      }
+    })
+  })
+})
 // return a tree object with root and factories keys
 app.get('/tree', async function (req, res){
   const tree = await Tree.get()
